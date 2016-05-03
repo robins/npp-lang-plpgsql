@@ -44,7 +44,7 @@ cpu_operator_cost
 cpu_tuple_cost
 cursor_tuple_fraction
 data_checksums
-DateStyle
+datestyle
 db_user_namespace
 deadlock_timeout
 debug_assertions
@@ -99,7 +99,7 @@ idle_in_transaction_session_timeout
 ignore_checksum_failure
 ignore_system_indexes
 integer_datetimes
-IntervalStyle
+intervalstyle
 join_collapse_limit
 krb_caseins_users
 krb_server_keyfile
@@ -210,7 +210,7 @@ tcp_keepalives_interval
 temp_buffers
 temp_file_limit
 temp_tablespaces
-TimeZone
+timezone
 timezone_abbreviations
 trace_lock_oidmin
 trace_lock_table
