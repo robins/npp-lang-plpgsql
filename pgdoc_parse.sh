@@ -14,7 +14,7 @@
     | grep -A2 "TOKEN" | tr -d '\n' | sed 's/--/\n/g' | grep -v "non-reserved" \
     | grep "reserved" | sed 's/\</ /g' | sed 's/\>/ /g' | awk '{print $9}' \
     | grep -v "<" | grep -v ">" \
-      > reserved_words.txt
+      > output/reserved_words.txt
 
       
 # Fetch Datatypes from PG Docs
@@ -38,7 +38,7 @@
     | grep "TYPE" | grep td | sed 's/\</ /g' | sed 's/\>/ /g' \
     | awk '{print $9}' | grep -v "<" | grep -v ">" | grep -v "XHTML" \
     | sort | uniq \
-      > datatypes.txt
+      > output/datatypes.txt
 
     
 # Fetch Configuration Parameters from PG Docs
@@ -58,4 +58,4 @@ curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-preset.html         \
   http://www.postgresql.org/docs/devel/static/runtime-config-developer.html      \
   | grep -oP -i 'varname.{0,40}' | cut --bytes=10- | cut -d "<" -f1 | sort| uniq \
-    > configuration_parameters.txt
+    > output/configuration_parameters.txt
