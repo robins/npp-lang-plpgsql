@@ -6,7 +6,7 @@
 # XXX: This currently fetches only the first items in the list (at times the list gives int / int4... in that we don't pick int4 yet)
 # XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
 # XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
-
+# XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
 
 # Fetch reserved words from PG Docs
 timeout -s SIGTERM 50 curl -so - \
