@@ -1,8 +1,14 @@
+# All the following scripts fetch from PG Docs (DEVEL branch)
+ 
 # XXX: Remove empty lines at the end of generated text files
-
-# Fetch reserved words from PG Docs - DEVEL branch
+# XXX: Some piped commands can be crafted better / concise (use cut -d ":" -f1 etc.)
 # XXX: This currently fetches ALL in the list, and doesn't filter those that are blank / non-reserved in PG column
+# XXX: This currently fetches only the first items in the list (at times the list gives int / int4... in that we don't pick int4 yet)
+# XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
+# XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
 
+
+# Fetch reserved words from PG Docs
  curl -so - \
   http://www.postgresql.org/docs/devel/static/sql-keywords-appendix.html  \
     | grep -A2 "TOKEN" | tr -d '\n' | sed 's/--/\n/g' | grep -v "non-reserved" \
@@ -10,12 +16,8 @@
     | grep -v "<" | grep -v ">" \
       > reserved_words.txt
 
-
- 
-# Fetch datatypes from PG Docs - DEVEL branch
-# XXX: This currently fetches only the first items in the list (at times the list gives int / int4... in that we don't pick int4 yet)
-# XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
-# XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
+      
+# Fetch Datatypes from PG Docs
  curl -so - \
   http://www.postgresql.org/docs/devel/static/datatype.html \
   http://www.postgresql.org/docs/devel/static/datatype-numeric.html \
@@ -39,6 +41,7 @@
       > datatypes.txt
 
     
+# Fetch Configuration Parameters from PG Docs
 curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-connection.html     \
   http://www.postgresql.org/docs/devel/static/runtime-config-resource.html       \
