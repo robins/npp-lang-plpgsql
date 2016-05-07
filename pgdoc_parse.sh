@@ -7,16 +7,18 @@
 # XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
 # XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
 # XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
+#XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
+
 
 # Fetch reserved words from PG Docs
 timeout -s SIGTERM 50 curl -so - \
   http://www.postgresql.org/docs/devel/static/sql-keywords-appendix.html  \
-    | grep -A2 "TOKEN" | tr -d '\n' | sed 's/--/\n/g' | grep -v "non-reserved" \
-    | grep "reserved" | sed 's/\</ /g' | sed 's/\>/ /g' | awk '{print $9}' \
+    | grep -A10 "TOKEN" | tr -d '\n' | sed 's/--/\n/g' | grep ">reserved<" \
+    | sed 's/\</ /g' | sed 's/\>/ /g' | awk '{print $9}' \
     | grep -v "<" | grep -v ">" | tr '[:upper:]' '[:lower:]' \
       > output/reserved_words.txt
 
-      
+
 # Fetch Datatypes from PG Docs
 timeout -s SIGTERM 100 curl -so - \
   http://www.postgresql.org/docs/devel/static/datatype.html \
@@ -40,7 +42,7 @@ timeout -s SIGTERM 100 curl -so - \
     | sort | uniq | tr '[:upper:]' '[:lower:]' \
       > output/datatypes.txt
 
-    
+
 # Fetch Configuration Parameters from PG Docs
 timeout -s SIGTERM 100 curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-connection.html     \
@@ -60,3 +62,20 @@ timeout -s SIGTERM 100 curl -so -  \
   | grep -oP -i 'varname.{0,40}' | cut --bytes=10- | cut -d "<" -f1 | sort| uniq \
   | tr '[:upper:]' '[:lower:]' \
     > output/configuration_parameters.txt
+
+    
+    
+#Fetch *ALL* HTML files from PostgreSQL Documentation in the DEVEL branch    
+wget -nd -L -e robots=off -T10 -A html -r http://www.postgresql.org/docs/devel/static/
+
+
+#Extract Reserved Words from the Downloaded HTML files (of PostgreSQL Doc)
+cat *.html | grep -oP 'COMMAND.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > command.txt
+
+cat *.html | grep -oP 'TOKEN.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > token.txt
+
+cat *.html | grep -oP 'LITERAL.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > literal.txt
+
