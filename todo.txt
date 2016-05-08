@@ -1,6 +1,0 @@
-Get a script to update function list as per a version
-
-
-Get a script to update function list with a customizable set of extensions list enabled.
-
-Get sql.xml file's autocomplete section and update that as per postgres and use that instead.

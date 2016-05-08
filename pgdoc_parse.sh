@@ -8,6 +8,8 @@
 # XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
 # XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
 # XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
+# XXX: Get a script to update function list with a customizable set of extensions list enabled.
+# XXX: Get sql.xml file's autocomplete section and update that as per postgres and use that instead.
 
 
 # Fetch reserved words from PG Docs
