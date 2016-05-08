@@ -7,16 +7,16 @@
 # XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
 # XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
 # XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
-#XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
+# XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
 
 
 # Fetch reserved words from PG Docs
 timeout -s SIGTERM 50 curl -so - \
-  http://www.postgresql.org/docs/devel/static/sql-keywords-appendix.html  \
-    | grep -A10 "TOKEN" | tr -d '\n' | sed 's/--/\n/g' | grep ">reserved<" \
-    | sed 's/\</ /g' | sed 's/\>/ /g' | awk '{print $9}' \
-    | grep -v "<" | grep -v ">" | tr '[:upper:]' '[:lower:]' \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/include/parser/kwlist.h" \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/pl/plpgsql/src/pl_scanner.c" \
+    | grep -w "PG_KEYWORD(" | cut -d "\"" -f2 | tr "\n" " " | tr '[:lower:]' '[:upper:]' \
       > output/reserved_words.txt
+
 
 
 # Fetch Datatypes from PG Docs
@@ -39,10 +39,24 @@ timeout -s SIGTERM 100 curl -so - \
   http://www.postgresql.org/docs/devel/static/datatype-pseudo.html \
     | grep "TYPE" | grep td | sed 's/\</ /g' | sed 's/\>/ /g' \
     | awk '{print $9}' | grep -v "<" | grep -v ">" | grep -v "XHTML" \
-    | sort | uniq | tr '[:upper:]' '[:lower:]' \
       > output/datatypes.txt
 
+timeout -s SIGTERM 100 curl -so - \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/interfaces/ecpg/preproc/c_keywords.c" \
+  | grep "{\"" | cut -d "\"" -f2  \
+    >> output/datatypes.txt
 
+timeout -s SIGTERM 100 curl -so - \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/backend/bootstrap/bootstrap.c" \
+  | grep "{\"" | cut -d "\"" -f2  \
+    >> output/datatypes.txt
+
+cat output/datatypes.txt | tr "[[:lower:]]" "[[:upper:]]" | sort | uniq \
+  | tr "\n" " " \
+    > output/datatypes.txt
+    
+    
+    
 # Fetch Configuration Parameters from PG Docs
 timeout -s SIGTERM 100 curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-connection.html     \
@@ -59,11 +73,30 @@ timeout -s SIGTERM 100 curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-error-handling.html \
   http://www.postgresql.org/docs/devel/static/runtime-config-preset.html         \
   http://www.postgresql.org/docs/devel/static/runtime-config-developer.html      \
-  | grep -oP -i 'varname.{0,40}' | cut --bytes=10- | cut -d "<" -f1 | sort| uniq \
-  | tr '[:upper:]' '[:lower:]' \
+  | grep -oP -i 'varname.{0,40}' | cut --bytes=10- | cut -d "<" -f1 \
+    > output/configuration_parameters.txt
+    
+#XXX: The difference between first and second list would tell about config variables
+#   that are either not documented or places that we are not seeing yet
+timeout -s SIGTERM 100 curl -so -  \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/backend/utils/misc/postgresql.conf.sample" \
+  "http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/backend/access/transam/recovery.conf.sample" \
+  | cut -d "=" -f1 | sed 's/#//' | sed 's/ //' | grep -v "[^[:lower:]_]" \
+    >> output/configuration_parameters.txt
+    
+
+timeout -s SIGTERM 100 curl -so - \
+  http://www.postgresql.org/docs/devel/static/libpq-connect.html \
+  | tr -d "\n"| sed 's/  */ /g' | grep -oP 'LIBPQ.{0,200}' \
+  | grep -oP 'LITERAL.{0,100}' | cut -d ">" -f2| cut -d "<" -f1  \
+  | grep -v "[^[:lower:]_]" \
+    >> output/configuration_parameters.txt
+
+cat output/configuration_parameters.txt | sort | uniq | tr "\n" " " \
     > output/configuration_parameters.txt
 
-    
+
+
     
 #Fetch *ALL* HTML files from PostgreSQL Documentation in the DEVEL branch    
 wget -nd -L -e robots=off -T10 -A html -r http://www.postgresql.org/docs/devel/static/
