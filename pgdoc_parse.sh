@@ -8,7 +8,7 @@
 # XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
 # XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
 # XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
-# XXX: Get a script to update function list with a customizable set of extensions list enabled.
+# XXX: Get a script to update function list of extensions
 # XXX: Get sql.xml file's autocomplete section and update that as per postgres and use that instead.
 
 
@@ -98,6 +98,14 @@ cat output/configuration_parameters.txt | sort | uniq | tr "\n" " " \
     > output/configuration_parameters.txt
 
 
+timeout -s SIGTERM 100 curl -so - \
+  http://www.postgresql.org/docs/devel/static/contrib.html \
+  | tr -d "\n" | sed 's/  */ /g' | sed 's/<\/dt>/\n/g' \
+  | grep -oP "dt>F.{0,50}" | cut -d ">" -f3 | cut -d "<" -f1 \
+  | sort | uniq | tr "\n" " " \
+    > output/extensions.txt
+
+
 
     
 #Fetch *ALL* HTML files from PostgreSQL Documentation in the DEVEL branch    
@@ -114,3 +122,5 @@ cat *.html | grep -oP 'TOKEN.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
 cat *.html | grep -oP 'LITERAL.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
   | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > literal.txt
 
+
+  
