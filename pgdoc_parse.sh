@@ -2,14 +2,10 @@
  
 # XXX: Remove empty lines at the end of generated text files
 # XXX: Some piped commands can be crafted better / concise (use cut -d ":" -f1 etc.)
-# XXX: This currently fetches ALL in the list, and doesn't filter those that are blank / non-reserved in PG column
-# XXX: This currently fetches only the first items in the list (at times the list gives int / int4... in that we don't pick int4 yet)
-# XXX: Similarly, we don't current pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
-# XXX: This list of URLs itself can be fetched directly, that'd allow fetching of new pages in PGDocs.
-# XXX: Replace all newlines with spaces in the output files (currently we're doing this by hand)
-# XXX: Instead of using cut --bytes=10- we should be using cut -d ">" -f2      
-# XXX: Get a script to update function list of extensions
-# XXX: Get sql.xml file's autocomplete section and update that as per postgres and use that instead.
+# XXX: Currently fetches only first datatype in the list (at times the list gives int / int4... in that we don't pick int4 yet)
+# XXX: Similarly, we don't currently pick up datatypes that are mentioned in between text (for e.g. http://www.postgresql.org/docs/9.1/static/datatype-binary.html mentions BLOB type, that we don't include yet)
+# XXX: Datatype / RunTime URLs should ideally be fetched from the parent URL page.
+# XXX: Get PLSQL's sql.xml's autocomplete section and update that as per postgres here.
 
 
 # Fetch reserved words from PG Docs
@@ -75,7 +71,7 @@ timeout -s SIGTERM 100 curl -so -  \
   http://www.postgresql.org/docs/devel/static/runtime-config-error-handling.html \
   http://www.postgresql.org/docs/devel/static/runtime-config-preset.html         \
   http://www.postgresql.org/docs/devel/static/runtime-config-developer.html      \
-  | grep -oP -i 'varname.{0,40}' | cut --bytes=10- | cut -d "<" -f1 \
+  | grep -oP -i 'varname.{0,40}' | cut -d ">" -f2 | cut -d "<" -f1 \
     > output/configuration_parameters.txt
     
 #XXX: The difference between first and second list would tell about config variables
@@ -106,21 +102,20 @@ timeout -s SIGTERM 100 curl -so - \
     > output/extensions.txt
 
 
-
     
 #Fetch *ALL* HTML files from PostgreSQL Documentation in the DEVEL branch    
-wget -nd -L -e robots=off -T10 -A html -r http://www.postgresql.org/docs/devel/static/
+# wget -nd -L -e robots=off -T10 -A html -r http://www.postgresql.org/docs/devel/static/
 
 
 #Extract Reserved Words from the Downloaded HTML files (of PostgreSQL Doc)
-cat *.html | grep -oP 'COMMAND.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
-  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > command.txt
+# cat *.html | grep -oP 'COMMAND.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  # | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > command.txt
 
-cat *.html | grep -oP 'TOKEN.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
-  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > token.txt
+# cat *.html | grep -oP 'TOKEN.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  # | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > token.txt
 
-cat *.html | grep -oP 'LITERAL.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
-  | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > literal.txt
+# cat *.html | grep -oP 'LITERAL.{0,100}' | cut -d ">" -f2 | cut -d "<" -f1 \
+  # | tr " " "\n" | grep -v "[^[:upper:]]" |  sort | uniq > literal.txt
 
 
   
